@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "DWMP Backend",
+      "runtimeExecutable": "backend/.venv/bin/python",
+      "runtimeArgs": ["app.py"],
+      "cwd": "/home/matthew/dude-wheres-my-part/backend",
+      "port": 8091
+    },
+    {
+      "name": "DWMP Frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--host", "0.0.0.0"],
+      "cwd": "/home/matthew/dude-wheres-my-part/frontend",
+      "port": 5176
+    }
+  ]
+}
