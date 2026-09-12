@@ -37,3 +37,40 @@ def current_status(part) -> dict | None:
         "last_imported_at": latest.imported_at.isoformat(),
         "snapshot_count": len(snaps),
     }
+
+
+def assembly_completion(assembly) -> dict:
+    """%complete for the leaderboard — a count of fact (parts currently sitting at the
+    assembly's declared terminal operation), never a plan comparison. Honestly "unknown"
+    (`pct_complete: None`) rather than guessed when the assembly has no parts yet or no
+    terminal_operation has been declared for it."""
+    parts = assembly.parts
+    total = len(parts)
+    if total == 0:
+        return {"total_parts": 0, "complete_parts": None, "pct_complete": None}
+    if not assembly.terminal_operation:
+        return {"total_parts": total, "complete_parts": None, "pct_complete": None}
+
+    complete = 0
+    for p in parts:
+        st = current_status(p)
+        if st and st["operation"] == assembly.terminal_operation:
+            complete += 1
+    return {
+        "total_parts": total,
+        "complete_parts": complete,
+        "pct_complete": round(100 * complete / total, 1),
+    }
+
+
+def assembly_risk(assembly) -> dict:
+    """The two signals the leaderboard sorts worst-first by: the longest any one of this
+    assembly's parts has been sitting still, and how many open expedite requests it's carrying."""
+    worst_dwell_sec = 0.0
+    open_hot_flags = 0
+    for p in assembly.parts:
+        st = current_status(p)
+        if st:
+            worst_dwell_sec = max(worst_dwell_sec, st["dwell_sec"])
+        open_hot_flags += sum(1 for f in p.hot_flags if f.status != "resolved")
+    return {"worst_dwell_sec": worst_dwell_sec, "open_hot_flags": open_hot_flags}

@@ -1,10 +1,51 @@
 from flask import Blueprint, jsonify, request
 
 from db import db
-from models import HOT_FLAG_STATUSES, HotFlag, ImportBatch, Part, StatusSnapshot, _now
-from status import current_status
+from models import HOT_FLAG_STATUSES, Assembly, HotFlag, ImportBatch, Part, StatusSnapshot, _now
+from status import assembly_completion, assembly_risk, current_status
 
 bp = Blueprint("parts", __name__, url_prefix="/api")
+
+
+@bp.get("/assemblies")
+def list_assemblies():
+    """The leaderboard: every assembly with its computed %complete and risk signals. `?project=`
+    and `?portfolio=` scope it — a project follows its own assemblies, a portfolio owner (or
+    nobody, i.e. the default) sees everything to compare across projects."""
+    q = Assembly.query
+    if project := request.args.get("project"):
+        q = q.filter(Assembly.project == project)
+    if portfolio := request.args.get("portfolio"):
+        q = q.filter(Assembly.portfolio == portfolio)
+
+    out = []
+    for a in q.all():
+        d = a.to_dict()
+        d["completion"] = assembly_completion(a)
+        d.update(assembly_risk(a))
+        out.append(d)
+    return jsonify(out)
+
+
+@bp.get("/assemblies/<assembly_id>")
+def get_assembly(assembly_id):
+    a = Assembly.query.get_or_404(assembly_id)
+    d = a.to_dict()
+    d["completion"] = assembly_completion(a)
+    d.update(assembly_risk(a))
+    d["parts"] = []
+    for p in a.parts:
+        pd = p.to_dict()
+        pd["status"] = current_status(p)
+        pd["open_hot_flags"] = sum(1 for f in p.hot_flags if f.status != "resolved")
+        d["parts"].append(pd)
+    return jsonify(d)
+
+
+@bp.get("/portfolios")
+def list_portfolios():
+    rows = db.session.query(Assembly.portfolio).filter(Assembly.portfolio.isnot(None)).distinct().all()
+    return jsonify(sorted({r[0] for r in rows}))
 
 
 @bp.get("/parts")

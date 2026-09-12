@@ -34,7 +34,9 @@ def _set_sqlite_pragma(dbapi_conn, connection_record):
 
 # (table_name, column_name, add_column_sql) — additive-only, run after create_all(). No legacy
 # data to worry about yet; revisit only if a destructive change is ever needed.
-_MIGRATIONS: list[tuple[str, str, str]] = []
+_MIGRATIONS: list[tuple[str, str, str]] = [
+    ("part", "assembly_id", "ALTER TABLE part ADD COLUMN assembly_id VARCHAR(36) REFERENCES assembly(id)"),
+]
 
 
 def _run_migrations(app):

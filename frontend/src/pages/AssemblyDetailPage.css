@@ -1,0 +1,93 @@
+.assembly-detail {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.assembly-detail__loading {
+  padding: 40px;
+  color: var(--color-text-faint);
+}
+
+.assembly-detail__inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.assembly-detail__back {
+  align-self: flex-start;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.assembly-detail__back:hover {
+  color: var(--color-accent);
+}
+
+.assembly-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.assembly-detail__title {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.assembly-detail__meta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.assembly-detail__stats {
+  display: flex;
+  gap: 28px;
+}
+
+.assembly-detail__stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-faint);
+  margin-bottom: 2px;
+}
+
+.assembly-detail__stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.assembly-detail__stat-value--overdue {
+  color: var(--color-critical);
+}
+
+.assembly-detail__stat-sub {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--color-text-faint);
+}
+
+.assembly-detail__note {
+  margin: 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--color-text-faint);
+}
+
+.assembly-detail__done-tag {
+  color: var(--color-success);
+  font-weight: 700;
+  font-size: 12px;
+}

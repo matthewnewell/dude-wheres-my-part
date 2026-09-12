@@ -33,8 +33,8 @@ export default function SplashPage() {
               to jump the queue, and the floor sees it without a phone call.
             </p>
             <div className="splash-hero__actions">
-              <Link className="splash-btn splash-btn--primary" to="/">View parts</Link>
-              <Link className="splash-btn splash-btn--ghost" to="/import">Import an extract</Link>
+              <Link className="splash-btn splash-btn--primary" to="/">View the leaderboard</Link>
+              <Link className="splash-btn splash-btn--ghost" to="/parts">View parts</Link>
             </div>
           </header>
 

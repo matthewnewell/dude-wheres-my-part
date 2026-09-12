@@ -1,0 +1,147 @@
+.leaderboard {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.leaderboard__inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.leaderboard__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.leaderboard__title {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.leaderboard__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
+.leaderboard__filters {
+  display: flex;
+  gap: 8px;
+}
+
+.leaderboard__filters select {
+  padding: 7px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: 13px;
+}
+
+.leaderboard__empty {
+  color: var(--color-text-faint);
+  font-size: 13px;
+}
+
+.assembly-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+.assembly-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.assembly-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.assembly-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.assembly-card__name {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.assembly-card__meta {
+  font-size: 12px;
+  color: var(--color-text-faint);
+  margin-top: 2px;
+}
+
+.assembly-card__progress-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.assembly-card__progress-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-surface-sunken);
+  overflow: hidden;
+}
+
+.assembly-card__progress-fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.assembly-card__pct {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.assembly-card__pct-sub {
+  font-weight: 400;
+  color: var(--color-text-faint);
+}
+
+.assembly-card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.due-pill {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.due-pill--overdue {
+  color: var(--color-critical);
+  font-weight: 700;
+}

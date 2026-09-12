@@ -1,6 +1,33 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
-import type { HotFlag, HotFlagStatus, ImportBatch, ImportRow, Part } from './types'
+import type { Assembly, HotFlag, HotFlagStatus, ImportBatch, ImportRow, Part } from './types'
+
+export function useAssemblies(filters?: { project?: string; portfolio?: string }) {
+  const params = new URLSearchParams()
+  if (filters?.project) params.set('project', filters.project)
+  if (filters?.portfolio) params.set('portfolio', filters.portfolio)
+  const qs = params.toString()
+  return useQuery({
+    queryKey: ['assemblies', filters?.project ?? null, filters?.portfolio ?? null],
+    queryFn: () => api.get<Assembly[]>(`/assemblies${qs ? `?${qs}` : ''}`),
+    refetchInterval: 30_000,
+  })
+}
+
+export function useAssembly(assemblyId: string | undefined) {
+  return useQuery({
+    queryKey: ['assemblies', 'detail', assemblyId],
+    queryFn: () => api.get<Assembly>(`/assemblies/${assemblyId}`),
+    enabled: !!assemblyId,
+  })
+}
+
+export function usePortfolios() {
+  return useQuery({
+    queryKey: ['portfolios'],
+    queryFn: () => api.get<string[]>('/portfolios'),
+  })
+}
 
 export function useParts(project?: string) {
   return useQuery({
@@ -37,8 +64,10 @@ function useInvalidateParts() {
   const qc = useQueryClient()
   return () => {
     qc.invalidateQueries({ queryKey: ['parts'] })
+    qc.invalidateQueries({ queryKey: ['assemblies'] })
     qc.invalidateQueries({ queryKey: ['import-batches'] })
     qc.invalidateQueries({ queryKey: ['projects'] })
+    qc.invalidateQueries({ queryKey: ['portfolios'] })
   }
 }
 

@@ -117,3 +117,37 @@ a {
   color: var(--color-accent);
   background: var(--color-surface-sunken);
 }
+
+/* ── shared "how long has it been sitting" / "has an open expedite request" pills — used on
+   the parts board and the leaderboard alike ── */
+.dwell-pill {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.dwell-pill--normal {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+}
+
+.dwell-pill--watch {
+  background: var(--color-wait-soft);
+  color: var(--color-wait);
+}
+
+.dwell-pill--stuck {
+  background: var(--color-critical-soft);
+  color: var(--color-critical);
+}
+
+.hot-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-accent);
+}

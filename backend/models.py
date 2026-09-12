@@ -14,6 +14,19 @@ through consecutive snapshots with the same `operation` value, not by comparing 
 planned routing or expected time per operation — the user's own routing data is known to run
 "historically very off", so DWMP deliberately never computes a plan-vs-actual variance or an
 automated "this is late" judgment. It shows the raw dwell time and lets a person decide.
+
+Assembly / Portfolio layer: a part is a subassembly belonging to an Assembly (a top-level built
+item — "Bracket Assembly Unit 1"), and an Assembly carries the `project` and `portfolio` labels
+(a Part still has its own `project` too, as a fallback for a part an extract created that
+hasn't been triaged into an assembly yet). This exists because reprioritization authority
+tracks the hierarchy, not a flat part list — a portfolio owner comparing assemblies across
+their own projects is who actually has standing to say "this one jumps the queue," which is a
+level above where a single part's hot flag lives. `Assembly.terminal_operation` is the one
+deliberately narrow piece of routing knowledge this app allows itself: not a full ordered
+routing (still refuses that — see above), just "which operation means this part is done,"
+optionally set per assembly, used only to compute the leaderboard's %complete (count of parts
+at that operation / total parts) — a fact, not a plan comparison. Left unset, %complete is
+honestly unknown rather than guessed.
 """
 
 from datetime import datetime, timezone
@@ -54,10 +67,44 @@ class ImportBatch(db.Model):
         }
 
 
+class Assembly(db.Model):
+    """A top-level built item — what a part is a subassembly *of*. Owns the `project` and
+    `portfolio` labels (plain text, same cross-app-by-convention pattern as everywhere else in
+    this ecosystem); the leaderboard is the list of these, ranked by what needs attention."""
+
+    __tablename__ = "assembly"
+
+    id = db.Column(db.String(36), primary_key=True, default=_uuid)
+    name = db.Column(db.String(200), nullable=False)
+    project = db.Column(db.String(200), nullable=True, index=True)
+    portfolio = db.Column(db.String(200), nullable=True, index=True)
+    due_date = db.Column(db.Date, nullable=True)
+    # Which S4 `operation` value means "this part is done" — see the module docstring. Optional;
+    # %complete is honestly "unknown" rather than guessed when it's not set.
+    terminal_operation = db.Column(db.String(200), nullable=True)
+    created_at = db.Column(db.DateTime, default=_now, nullable=False)
+
+    parts = db.relationship("Part", backref="assembly", lazy="selectin", order_by="Part.part_number")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "project": self.project,
+            "portfolio": self.portfolio,
+            "due_date": self.due_date.isoformat() if self.due_date else None,
+            "terminal_operation": self.terminal_operation,
+            "created_at": self.created_at.isoformat(),
+            "part_count": len(self.parts),
+        }
+
+
 class Part(db.Model):
-    """A specific part/lot/work order moving through the shop. `project` is a plain text
-    label — same convention Value Stream and Conway's Depot use for cross-app context: each
-    app keeps its own copy, tied together only by matching the string, no shared database."""
+    """A specific part/lot/work order moving through the shop. `assembly_id` is nullable — a
+    part an extract created is a real part before anyone's had a chance to triage it into an
+    assembly. `project` is that same part's own plain-text fallback label for exactly that
+    not-yet-triaged case; once assigned to an assembly, the assembly's `project`/`portfolio` are
+    what the hierarchy views (leaderboard, assembly detail) actually use."""
 
     __tablename__ = "part"
 
@@ -66,6 +113,7 @@ class Part(db.Model):
     description = db.Column(db.String(300), nullable=True)
     project = db.Column(db.String(200), nullable=True, index=True)
     order_number = db.Column(db.String(80), nullable=True)
+    assembly_id = db.Column(db.String(36), db.ForeignKey("assembly.id"), nullable=True, index=True)
     created_at = db.Column(db.DateTime, default=_now, nullable=False)
 
     snapshots = db.relationship(
@@ -88,8 +136,10 @@ class Part(db.Model):
             "id": self.id,
             "part_number": self.part_number,
             "description": self.description,
-            "project": self.project,
+            "project": self.assembly.project if self.assembly else self.project,
             "order_number": self.order_number,
+            "assembly_id": self.assembly_id,
+            "assembly_name": self.assembly.name if self.assembly else None,
             "created_at": self.created_at.isoformat(),
         }
         if include_snapshots:

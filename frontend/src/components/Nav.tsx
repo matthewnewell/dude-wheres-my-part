@@ -15,6 +15,12 @@ export default function Nav() {
           end
           className={({ isActive }) => `dwmp-nav__link ${isActive ? 'dwmp-nav__link--active' : ''}`}
         >
+          Leaderboard
+        </NavLink>
+        <NavLink
+          to="/parts"
+          className={({ isActive }) => `dwmp-nav__link ${isActive ? 'dwmp-nav__link--active' : ''}`}
+        >
           Parts
         </NavLink>
         <NavLink

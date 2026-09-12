@@ -76,6 +76,15 @@ export default function PartsBoardPage() {
                     <td className="parts-table__strong">
                       {p.part_number}
                       {p.description && <span className="parts-table__desc"> · {p.description}</span>}
+                      {p.assembly_name && (
+                        <Link
+                          className="parts-table__assembly-link"
+                          to={`/assemblies/${p.assembly_id}`}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {p.assembly_name}
+                        </Link>
+                      )}
                     </td>
                     <td>{p.project ?? <span className="parts-table__muted">—</span>}</td>
                     <td>{p.status?.operation ?? <span className="parts-table__muted">no status yet</span>}</td>

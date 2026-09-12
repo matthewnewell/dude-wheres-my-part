@@ -1,45 +1,49 @@
 """
-Demo seed — two "S4 extract" pulls, six days apart, across two projects that also exist as
-real demo projects in Value Stream and Conway's Depot ("Demo: Bracket Assembly Program",
-"Demo: Nacelle Fairing Retrofit") — the same cross-app-by-convention pattern those two use for
-each other, not a shared database.
+Demo seed — two assemblies, two "S4 extract" pulls six days apart, across two projects that
+also exist as real demo projects in Value Stream and Conway's Depot ("Demo: Bracket Assembly
+Program", "Demo: Nacelle Fairing Retrofit") — the same cross-app-by-convention pattern those
+two use for each other, not a shared database. Portfolio matches Conway's Depot's own seeded
+Portfolio ("Industrial Programs") for the same reason.
 
 Deliberately includes parts that DIDN'T move between the two pulls (the realistic case — an
 extract lists every part every time, moved or not) so dwell time has something to actually
-show, plus two open-vs-acknowledged hot flags so that flow has real data on first run too.
+show; two open-vs-acknowledged hot flags so that flow has real data on first run; and the two
+assemblies land at different %complete (0/5 vs 1/3) and different due-date urgency so the
+leaderboard has something worth ranking.
 """
 
-from datetime import timedelta
+from datetime import date, timedelta
 
 from db import db
-from models import HotFlag, ImportBatch, Part, StatusSnapshot, _now
+from models import Assembly, HotFlag, ImportBatch, Part, StatusSnapshot, _now
 
 DAY = timedelta(days=1)
-
+_PORTFOLIO = "Industrial Programs"
 _BKT = "Demo: Bracket Assembly Program"
 _NAC = "Demo: Nacelle Fairing Retrofit"
+_TERMINAL_OP = "Pack & Stage to Stock"
 
-# part_number, project, description, order_number, op six days ago, op today, notes today
+# part_number, assembly key, description, order_number, op six days ago, op today, notes today
 _ROWS = [
-    ("BKT-1001", _BKT, "Mounting bracket, machined aluminum", "WO-44210",
+    ("BKT-1001", "bkt", "Mounting bracket, machined aluminum", "WO-44210",
      "Material Issue / Kitting", "Fabrication (Cut / Machine)", None),
-    ("BKT-1002", _BKT, "Mounting bracket, machined aluminum", "WO-44211",
+    ("BKT-1002", "bkt", "Mounting bracket, machined aluminum", "WO-44211",
      "Fabrication (Cut / Machine)", "Fabrication (Cut / Machine)",
      "Awaiting 2nd-op tooling — fixture in use on another job"),
-    ("BKT-1003", _BKT, "Standoff, weldment", "WO-44212",
+    ("BKT-1003", "bkt", "Standoff, weldment", "WO-44212",
      "Joining (Weld / Braze / Bond)", "In-Process Inspection", None),
-    ("BKT-1004", _BKT, "Bracket, painted assy", "WO-44213",
+    ("BKT-1004", "bkt", "Bracket, painted assy", "WO-44213",
      "Finish (Paint / Coat / Plate)", "Finish (Paint / Coat / Plate)",
      "Paint booth backlog — 3 units ahead in queue"),
-    ("BKT-1005", _BKT, "Bracket, final assy", "WO-44214",
+    ("BKT-1005", "bkt", "Bracket, final assy", "WO-44214",
      "Assembly", "Final Inspection & Test", None),
-    ("NAC-2001", _NAC, "Fairing rib, formed sheet", "WO-51002",
+    ("NAC-2001", "nac", "Fairing rib, formed sheet", "WO-51002",
      "Material Issue / Kitting", "Joining (Weld / Braze / Bond)", None),
-    ("NAC-2002", _NAC, "Fairing panel, bonded", "WO-51003",
+    ("NAC-2002", "nac", "Fairing panel, bonded", "WO-51003",
      "In-Process Inspection", "In-Process Inspection",
      "NDT hold — awaiting inspector availability"),
-    ("NAC-2003", _NAC, "Fairing assy, complete", "WO-51004",
-     "Pack & Stage to Stock", "Pack & Stage to Stock",
+    ("NAC-2003", "nac", "Fairing assy, complete", "WO-51004",
+     _TERMINAL_OP, _TERMINAL_OP,
      "Ready to ship — awaiting customer pickup slot"),
 ]
 
@@ -56,16 +60,31 @@ def seed_if_empty():
     if Part.query.count() > 0:
         return
 
+    today = date.today()
+    assemblies = {
+        "bkt": Assembly(
+            name="Bracket Assembly Unit 1", project=_BKT, portfolio=_PORTFOLIO,
+            due_date=today + 3 * DAY, terminal_operation=_TERMINAL_OP,
+        ),
+        "nac": Assembly(
+            name="Nacelle Fairing Assembly 1", project=_NAC, portfolio=_PORTFOLIO,
+            due_date=today + 10 * DAY, terminal_operation=_TERMINAL_OP,
+        ),
+    }
+    db.session.add_all(assemblies.values())
+    db.session.flush()
+
     batch_a = ImportBatch(imported_at=_now() - 6 * DAY, source_label="S4 extract", row_count=len(_ROWS))
     batch_b = ImportBatch(imported_at=_now(), source_label="S4 extract", row_count=len(_ROWS))
     db.session.add_all([batch_a, batch_b])
     db.session.flush()
 
     parts_by_number = {}
-    for part_number, project, description, order_number, op_a, op_b, notes_b in _ROWS:
+    for part_number, assembly_key, description, order_number, op_a, op_b, notes_b in _ROWS:
+        assembly = assemblies[assembly_key]
         part = Part(
-            part_number=part_number, project=project, description=description,
-            order_number=order_number, created_at=batch_a.imported_at,
+            part_number=part_number, project=assembly.project, description=description,
+            order_number=order_number, assembly_id=assembly.id, created_at=batch_a.imported_at,
         )
         db.session.add(part)
         db.session.flush()

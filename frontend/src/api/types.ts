@@ -39,13 +39,41 @@ export interface Part {
   id: string
   part_number: string
   description: string | null
+  /** The part's own project label, or — once it's assigned to an assembly — that assembly's
+   * project. See assembly_id/assembly_name for which case you're in. */
   project: string | null
   order_number: string | null
+  assembly_id: string | null
+  assembly_name: string | null
   created_at: string
   status: PartStatus | null
   open_hot_flags?: number
   snapshots?: StatusSnapshot[]
   hot_flags?: HotFlag[]
+}
+
+/** %complete is a count of fact (parts at the assembly's declared terminal operation), never a
+ * plan comparison — see backend/models.py. Both counts are null when there's no
+ * terminal_operation set (or no parts yet): honestly unknown, not guessed. */
+export interface AssemblyCompletion {
+  total_parts: number
+  complete_parts: number | null
+  pct_complete: number | null
+}
+
+export interface Assembly {
+  id: string
+  name: string
+  project: string | null
+  portfolio: string | null
+  due_date: string | null
+  terminal_operation: string | null
+  created_at: string
+  part_count: number
+  completion: AssemblyCompletion
+  worst_dwell_sec: number
+  open_hot_flags: number
+  parts?: Part[]
 }
 
 export interface ImportBatch {

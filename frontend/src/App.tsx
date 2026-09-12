@@ -1,6 +1,8 @@
 import { Route, Routes } from 'react-router-dom'
 import Nav from './components/Nav'
 import SplashPage from './pages/SplashPage'
+import LeaderboardPage from './pages/LeaderboardPage'
+import AssemblyDetailPage from './pages/AssemblyDetailPage'
 import PartsBoardPage from './pages/PartsBoardPage'
 import PartDetailPage from './pages/PartDetailPage'
 import ImportPage from './pages/ImportPage'
@@ -22,7 +24,9 @@ export default function App() {
   return (
     <Routes>
       <Route path="/about" element={<SplashPage />} />
-      <Route path="/" element={<Layout><PartsBoardPage /></Layout>} />
+      <Route path="/" element={<Layout><LeaderboardPage /></Layout>} />
+      <Route path="/assemblies/:assemblyId" element={<Layout><AssemblyDetailPage /></Layout>} />
+      <Route path="/parts" element={<Layout><PartsBoardPage /></Layout>} />
       <Route path="/parts/:partId" element={<Layout><PartDetailPage /></Layout>} />
       <Route path="/import" element={<Layout><ImportPage /></Layout>} />
     </Routes>
