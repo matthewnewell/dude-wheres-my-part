@@ -10,6 +10,7 @@ from status import (
     collect_subtree_parts,
     current_status,
     operation_constraints,
+    part_done,
 )
 
 bp = Blueprint("parts", __name__, url_prefix="/api")
@@ -87,6 +88,7 @@ def get_assembly(assembly_id):
         pd = p.to_dict()
         pd["status"] = current_status(p)
         pd["open_hot_flags"] = sum(1 for f in p.hot_flags if f.status != "resolved")
+        pd["done"] = part_done(pd["status"], a.terminal_operation)
         d["parts"].append(pd)
     return jsonify(d)
 
@@ -103,6 +105,10 @@ def flatten_assembly(assembly_id):
         pd = p.to_dict()
         pd["status"] = current_status(p)
         pd["open_hot_flags"] = sum(1 for f in p.hot_flags if f.status != "resolved")
+        # "Done" relative to THIS assembly's terminal operation, same as its own %complete —
+        # not the part's own direct (sub)assembly's, so the number you see here always agrees
+        # with the %complete stat at the top of the page you're looking at.
+        pd["done"] = part_done(pd["status"], a.terminal_operation)
         # Path from THIS assembly down to the part's direct owner, not all the way to the root.
         full_path = assembly_path(p.assembly)
         start = next((i for i, node in enumerate(full_path) if node.id == a.id), 0)

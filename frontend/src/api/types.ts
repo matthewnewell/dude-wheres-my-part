@@ -52,6 +52,11 @@ export interface Part {
    * "Hardware Set" — not just assembly_name's leaf. [] (or absent) if unassigned. Present on
    * /parts and /parts/:id; not sent everywhere a Part appears. */
   assembly_chain?: string[]
+  /** Tri-state, relative to whichever assembly you asked about (its terminal_operation) — true
+   * (reached it), false (hasn't), or null (can't tell: no terminal operation declared, or no
+   * status yet). Only present on the assembly detail/flatten endpoints, which know which
+   * assembly's terminal operation to check against. */
+  done?: boolean | null
   snapshots?: StatusSnapshot[]
   hot_flags?: HotFlag[]
 }

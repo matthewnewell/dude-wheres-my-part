@@ -18,7 +18,7 @@
 }
 
 .assembly-detail__breadcrumb {
-  align-self: flex-start;
+  margin: 2px 0 8px;
   font-size: 13px;
   font-weight: 600;
   color: var(--color-text-faint);

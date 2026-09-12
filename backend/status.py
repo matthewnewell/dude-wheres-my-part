@@ -39,6 +39,18 @@ def current_status(part) -> dict | None:
     }
 
 
+def part_done(status: dict | None, terminal_operation: str | None) -> bool | None:
+    """Tri-state, not a plain bool: True if the part's current operation matches the given
+    terminal operation, False if it doesn't, None if there's no way to tell (no terminal
+    operation declared for the assembly being asked about, or the part has no status yet).
+    "Done" is always relative to whichever assembly's terminal_operation you're asking about —
+    matches assembly_completion's own logic, so a part can read "done" under one assembly's view
+    and "unknown" under another's if only one of them has a terminal operation set."""
+    if not terminal_operation or not status:
+        return None
+    return status["operation"] == terminal_operation
+
+
 def assembly_path(assembly) -> list:
     """Root-to-self chain of assemblies — the breadcrumb trail (top-level assembly first, this
     one last). Used for the detail page's breadcrumb and to label each part in the flatten view

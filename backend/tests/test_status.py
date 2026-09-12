@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from status import assembly_chain_names, assembly_path, collect_subtree_parts, current_status  # noqa: E402
+from status import assembly_chain_names, assembly_path, collect_subtree_parts, current_status, part_done  # noqa: E402
 
 NOW = datetime.now(timezone.utc)
 
@@ -93,3 +93,21 @@ def test_assembly_chain_names_is_root_to_direct_assembly():
 def test_assembly_chain_names_empty_when_unassigned():
     p = SimpleNamespace(assembly=None)
     assert assembly_chain_names(p) == []
+
+
+# ── part_done: tri-state, relative to whichever terminal_operation you ask about ──────────────
+
+def test_part_done_true_when_operation_matches():
+    assert part_done({"operation": "Ship"}, "Ship") is True
+
+
+def test_part_done_false_when_operation_differs():
+    assert part_done({"operation": "Weld"}, "Ship") is False
+
+
+def test_part_done_unknown_when_no_terminal_operation():
+    assert part_done({"operation": "Ship"}, None) is None
+
+
+def test_part_done_unknown_when_no_status_yet():
+    assert part_done(None, "Ship") is None
