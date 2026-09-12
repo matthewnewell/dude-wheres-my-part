@@ -39,3 +39,27 @@
   background: var(--color-accent-soft);
   color: var(--color-accent);
 }
+
+.dwmp-nav__gear {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  color: var(--color-text-faint);
+  text-decoration: none;
+}
+
+.dwmp-nav__gear:hover {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+}
+
+.dwmp-nav__gear--active {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}

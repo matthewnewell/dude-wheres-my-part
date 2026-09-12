@@ -27,7 +27,7 @@ export default function AssemblyDetailPage() {
   return (
     <div className="assembly-detail">
       <div className="assembly-detail__inner">
-        <Link className="assembly-detail__back" to="/">← Leaderboard</Link>
+        <Link className="assembly-detail__back" to="/">← Assembly</Link>
 
         <header className="assembly-detail__header">
           <div>

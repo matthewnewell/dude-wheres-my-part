@@ -121,8 +121,8 @@ export default function LeaderboardPage() {
       <div className="leaderboard__inner">
         <header className="leaderboard__header">
           <div>
-            <h1 className="leaderboard__title">Leaderboard</h1>
-            <p className="leaderboard__hint">Every top-level assembly. Click a column to sort.</p>
+            <h1 className="leaderboard__title">Assembly</h1>
+            <p className="leaderboard__hint">Every top-level assembly, worst-first. Click a column to sort, a row to drill into its parts.</p>
           </div>
         </header>
 
