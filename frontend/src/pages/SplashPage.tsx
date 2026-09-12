@@ -31,49 +31,47 @@ export default function SplashPage() {
             <p className="splash-hero__sub">
               Track assemblies and identify workflow bottlenecks.
             </p>
-            <div className="splash-hero__actions">
-              <Link className="splash-btn splash-btn--primary" to="/">View Assembly</Link>
-              <Link className="splash-btn splash-btn--ghost" to="/backlog">Backlog</Link>
-            </div>
           </header>
 
           <figure className="splash-figure">
-            <svg viewBox="0 0 720 140" role="img" aria-labelledby="dwmp-figure-title">
-              <title id="dwmp-figure-title">
-                A part sits at the Weld station for six days while the rest of the line moves —
-                visible at a glance instead of an email asking where it is.
-              </title>
-              {STATIONS.map((name, i) => {
-                const x = 20 + i * 100
-                const stuck = i === STUCK_INDEX
-                return (
-                  <g key={name}>
-                    <rect
-                      x={x} y={30} width={80} height={50} rx={8}
-                      fill={stuck ? 'var(--color-accent-soft)' : 'var(--color-surface-sunken)'}
-                      stroke={stuck ? 'var(--color-accent)' : 'var(--color-border-strong)'}
-                      strokeWidth={stuck ? 2 : 1}
-                    />
-                    <text x={x + 40} y={59} textAnchor="middle" className="splash-figure__station">
-                      {name}
-                    </text>
-                    {i < STATIONS.length - 1 && (
-                      <path d={`M${x + 82} 55 L${x + 98} 55`} stroke="var(--color-border-strong)" strokeWidth={1.5} markerEnd="url(#arrow)" />
-                    )}
-                    {stuck && (
-                      <text x={x + 40} y={100} textAnchor="middle" className="splash-figure__flag">
-                        🔥 6 days
+            <Link className="splash-figure__link" to="/">
+              <svg viewBox="0 0 720 140" role="img" aria-labelledby="dwmp-figure-title">
+                <title id="dwmp-figure-title">
+                  A part sits at the Weld station for six days while the rest of the line moves —
+                  visible at a glance instead of an email asking where it is. Click to view Assembly.
+                </title>
+                {STATIONS.map((name, i) => {
+                  const x = 20 + i * 100
+                  const stuck = i === STUCK_INDEX
+                  return (
+                    <g key={name}>
+                      <rect
+                        x={x} y={30} width={80} height={50} rx={8}
+                        fill={stuck ? 'var(--color-accent-soft)' : 'var(--color-surface-sunken)'}
+                        stroke={stuck ? 'var(--color-accent)' : 'var(--color-border-strong)'}
+                        strokeWidth={stuck ? 2 : 1}
+                      />
+                      <text x={x + 40} y={59} textAnchor="middle" className="splash-figure__station">
+                        {name}
                       </text>
-                    )}
-                  </g>
-                )
-              })}
-              <defs>
-                <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-                  <path d="M0,0 L6,3 L0,6 Z" fill="var(--color-border-strong)" />
-                </marker>
-              </defs>
-            </svg>
+                      {i < STATIONS.length - 1 && (
+                        <path d={`M${x + 82} 55 L${x + 98} 55`} stroke="var(--color-border-strong)" strokeWidth={1.5} markerEnd="url(#arrow)" />
+                      )}
+                      {stuck && (
+                        <text x={x + 40} y={100} textAnchor="middle" className="splash-figure__flag">
+                          🔥 6 days
+                        </text>
+                      )}
+                    </g>
+                  )
+                })}
+                <defs>
+                  <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                    <path d="M0,0 L6,3 L0,6 Z" fill="var(--color-border-strong)" />
+                  </marker>
+                </defs>
+              </svg>
+            </Link>
           </figure>
 
           <div className="splash-grid">
