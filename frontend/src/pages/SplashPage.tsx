@@ -27,10 +27,12 @@ export default function SplashPage() {
       <div className="splash-page__scroll">
         <div className="splash-page__content">
           <header className="splash-hero">
-            <h1 className="splash-hero__title">Dude, Where's My Part?</h1>
+            <h1 className="splash-hero__title">Manufacturing Work in Progress</h1>
+            <p className="splash-hero__tagline">
+              Real-time visibility, no report required.
+            </p>
             <p className="splash-hero__sub">
-              Every part's status, as of the last extract — no email required. Flag what needs
-              to jump the queue, and the floor sees it without a phone call.
+              Track parts across every stage of production and identify workflow bottlenecks.
             </p>
             <div className="splash-hero__actions">
               <Link className="splash-btn splash-btn--primary" to="/">View Assembly</Link>

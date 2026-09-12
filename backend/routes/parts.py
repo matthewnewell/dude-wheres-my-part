@@ -2,17 +2,26 @@ from flask import Blueprint, jsonify, request
 
 from db import db
 from models import HOT_FLAG_STATUSES, Assembly, HotFlag, ImportBatch, Part, StatusSnapshot, _now
-from status import assembly_completion, assembly_risk, current_status, operation_constraints
+from status import (
+    assembly_completion,
+    assembly_path,
+    assembly_risk,
+    collect_subtree_parts,
+    current_status,
+    operation_constraints,
+)
 
 bp = Blueprint("parts", __name__, url_prefix="/api")
 
 
 @bp.get("/assemblies")
 def list_assemblies():
-    """The leaderboard: every assembly with its computed %complete and risk signals. `?project=`
-    and `?portfolio=` scope it — a project follows its own assemblies, a portfolio owner (or
-    nobody, i.e. the default) sees everything to compare across projects."""
-    q = Assembly.query
+    """The leaderboard: every *top-level* assembly (no parent) with its computed %complete and
+    risk signals, rolled up across its whole subassembly subtree. `?project=` and `?portfolio=`
+    scope it — a project follows its own assemblies, a portfolio owner (or nobody, i.e. the
+    default) sees everything to compare across projects. Subassemblies never show up here —
+    only when you drill into their parent."""
+    q = Assembly.query.filter(Assembly.parent_assembly_id.is_(None))
     if project := request.args.get("project"):
         q = q.filter(Assembly.project == project)
     if portfolio := request.args.get("portfolio"):
@@ -27,12 +36,51 @@ def list_assemblies():
     return jsonify(out)
 
 
+@bp.post("/assemblies")
+def create_assembly():
+    """Create a top-level assembly, or a subassembly when `parent_assembly_id` is given."""
+    body = request.get_json(force=True) or {}
+    name = (body.get("name") or "").strip()
+    if not name:
+        return jsonify({"error": "name is required"}), 400
+
+    parent = None
+    if parent_id := body.get("parent_assembly_id"):
+        parent = Assembly.query.get_or_404(parent_id)
+
+    assembly = Assembly(
+        name=name,
+        # A subassembly inherits its parent's project/portfolio by default — it's part of the
+        # same build — but an explicit value in the body still wins.
+        project=(body.get("project") or "").strip() or (parent.project if parent else None) or None,
+        portfolio=(body.get("portfolio") or "").strip() or (parent.portfolio if parent else None) or None,
+        due_date=body.get("due_date") or None,
+        terminal_operation=(body.get("terminal_operation") or "").strip() or None,
+        parent_assembly_id=parent.id if parent else None,
+    )
+    db.session.add(assembly)
+    db.session.commit()
+    return jsonify(assembly.to_dict()), 201
+
+
 @bp.get("/assemblies/<assembly_id>")
 def get_assembly(assembly_id):
+    """Direct children (subassemblies, each with their own rolled-up completion/risk) and
+    direct parts only — the tree view, one level at a time. `ancestors` is the root-to-self
+    breadcrumb; use GET /assemblies/<id>/flatten for every part at any depth in one list."""
     a = Assembly.query.get_or_404(assembly_id)
     d = a.to_dict()
     d["completion"] = assembly_completion(a)
     d.update(assembly_risk(a))
+    d["ancestors"] = [anc.to_dict() for anc in assembly_path(a)[:-1]]
+
+    d["children"] = []
+    for child in a.children:
+        cd = child.to_dict()
+        cd["completion"] = assembly_completion(child)
+        cd.update(assembly_risk(child))
+        d["children"].append(cd)
+
     d["parts"] = []
     for p in a.parts:
         pd = p.to_dict()
@@ -40,6 +88,27 @@ def get_assembly(assembly_id):
         pd["open_hot_flags"] = sum(1 for f in p.hot_flags if f.status != "resolved")
         d["parts"].append(pd)
     return jsonify(d)
+
+
+@bp.get("/assemblies/<assembly_id>/flatten")
+def flatten_assembly(assembly_id):
+    """Every part anywhere under this assembly, at any depth, in one flat list — for when you
+    just want to see every component instead of drilling into each subassembly one level at a
+    time. Each part carries `assembly_path`: the subassembly chain (root at this assembly) it
+    actually lives in, so "flat" doesn't mean "you lose track of where it came from.\""""
+    a = Assembly.query.get_or_404(assembly_id)
+    out = []
+    for p in collect_subtree_parts(a):
+        pd = p.to_dict()
+        pd["status"] = current_status(p)
+        pd["open_hot_flags"] = sum(1 for f in p.hot_flags if f.status != "resolved")
+        # Path from THIS assembly down to the part's direct owner, not all the way to the root.
+        full_path = assembly_path(p.assembly)
+        start = next((i for i, node in enumerate(full_path) if node.id == a.id), 0)
+        pd["assembly_path"] = [node.name for node in full_path[start:]]
+        out.append(pd)
+    out.sort(key=lambda pd: (pd["status"]["dwell_sec"] if pd["status"] else 0), reverse=True)
+    return jsonify(out)
 
 
 @bp.get("/portfolios")

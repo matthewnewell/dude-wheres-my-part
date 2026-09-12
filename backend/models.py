@@ -15,18 +15,28 @@ planned routing or expected time per operation — the user's own routing data i
 "historically very off", so DWMP deliberately never computes a plan-vs-actual variance or an
 automated "this is late" judgment. It shows the raw dwell time and lets a person decide.
 
-Assembly / Portfolio layer: a part is a subassembly belonging to an Assembly (a top-level built
-item — "Bracket Assembly Unit 1"), and an Assembly carries the `project` and `portfolio` labels
-(a Part still has its own `project` too, as a fallback for a part an extract created that
-hasn't been triaged into an assembly yet). This exists because reprioritization authority
-tracks the hierarchy, not a flat part list — a portfolio owner comparing assemblies across
-their own projects is who actually has standing to say "this one jumps the queue," which is a
-level above where a single part's hot flag lives. `Assembly.terminal_operation` is the one
-deliberately narrow piece of routing knowledge this app allows itself: not a full ordered
-routing (still refuses that — see above), just "which operation means this part is done,"
-optionally set per assembly, used only to compute the leaderboard's %complete (count of parts
-at that operation / total parts) — a fact, not a plan comparison. Left unset, %complete is
-honestly unknown rather than guessed.
+Assembly / Portfolio layer: a part belongs to an Assembly, and an Assembly carries the
+`project` and `portfolio` labels (a Part still has its own `project` too, as a fallback for a
+part an extract created that hasn't been triaged into an assembly yet). This exists because
+reprioritization authority tracks the hierarchy, not a flat part list — a portfolio owner
+comparing assemblies across their own projects is who actually has standing to say "this one
+jumps the queue," which is a level above where a single part's hot flag lives.
+`Assembly.terminal_operation` is the one deliberately narrow piece of routing knowledge this
+app allows itself: not a full ordered routing (still refuses that — see above), just "which
+operation means this part is done," optionally set per assembly, used only to compute the
+leaderboard's %complete — a fact, not a plan comparison. Left unset, %complete is honestly
+unknown rather than guessed.
+
+An Assembly can itself contain child Assemblies (`parent_assembly_id`, self-referential) —
+subassemblies, sub-subassemblies, as deep as a real BOM actually goes. The leaderboard only
+ever lists top-level assemblies (`parent_assembly_id IS NULL`) — what a project actually
+follows; a subassembly surfaces only when you drill into its parent. `%complete`/risk always
+roll up the *whole* subtree (see `status.collect_subtree_parts`), not just an assembly's direct
+parts, so a top-level assembly whose parts all live several subassembly layers down still shows
+a real number instead of "0 of 0." The "flatten" view (`GET /assemblies/<id>/flatten`) is the
+other side of that: every part anywhere under an assembly, in one flat list, each carrying the
+subassembly path it actually lives in — for when you just want to see every component without
+clicking through the tree one level at a time.
 """
 
 from datetime import datetime, timezone
@@ -82,9 +92,18 @@ class Assembly(db.Model):
     # Which S4 `operation` value means "this part is done" — see the module docstring. Optional;
     # %complete is honestly "unknown" rather than guessed when it's not set.
     terminal_operation = db.Column(db.String(200), nullable=True)
+    # Self-referential — see the module docstring's subassembly section. Null = top-level, the
+    # only kind the leaderboard lists directly.
+    parent_assembly_id = db.Column(db.String(36), db.ForeignKey("assembly.id"), nullable=True, index=True)
     created_at = db.Column(db.DateTime, default=_now, nullable=False)
 
     parts = db.relationship("Part", backref="assembly", lazy="selectin", order_by="Part.part_number")
+    children = db.relationship(
+        "Assembly",
+        backref=db.backref("parent", remote_side=[id]),
+        lazy="selectin",
+        order_by="Assembly.name",
+    )
 
     def to_dict(self) -> dict:
         return {
@@ -94,8 +113,10 @@ class Assembly(db.Model):
             "portfolio": self.portfolio,
             "due_date": self.due_date.isoformat() if self.due_date else None,
             "terminal_operation": self.terminal_operation,
+            "parent_assembly_id": self.parent_assembly_id,
             "created_at": self.created_at.isoformat(),
-            "part_count": len(self.parts),
+            "part_count": len(self.parts),  # direct parts only — see collect_subtree_parts for the rolled-up count
+            "child_count": len(self.children),
         }
 
 

@@ -36,6 +36,7 @@ def _set_sqlite_pragma(dbapi_conn, connection_record):
 # data to worry about yet; revisit only if a destructive change is ever needed.
 _MIGRATIONS: list[tuple[str, str, str]] = [
     ("part", "assembly_id", "ALTER TABLE part ADD COLUMN assembly_id VARCHAR(36) REFERENCES assembly(id)"),
+    ("assembly", "parent_assembly_id", "ALTER TABLE assembly ADD COLUMN parent_assembly_id VARCHAR(36) REFERENCES assembly(id)"),
 ]
 
 

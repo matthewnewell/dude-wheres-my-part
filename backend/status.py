@@ -39,12 +39,46 @@ def current_status(part) -> dict | None:
     }
 
 
+def assembly_path(assembly) -> list:
+    """Root-to-self chain of assemblies — the breadcrumb trail (top-level assembly first, this
+    one last). Used for the detail page's breadcrumb and to label each part in the flatten view
+    with which subassembly it actually lives in."""
+    chain = []
+    node = assembly
+    while node is not None:
+        chain.append(node)
+        node = node.parent
+    return list(reversed(chain))
+
+
+def collect_descendant_assemblies(assembly) -> list:
+    """Every assembly nested under this one, at any depth — not including itself."""
+    out = []
+    for child in assembly.children:
+        out.append(child)
+        out.extend(collect_descendant_assemblies(child))
+    return out
+
+
+def collect_subtree_parts(assembly) -> list:
+    """Every part belonging to this assembly OR any assembly nested under it, at any depth —
+    the "flatten" view. A real BOM buries parts several subassembly layers down; %complete and
+    risk roll up the whole subtree (below) so a top-level assembly whose parts all live in
+    subassemblies still shows a real number instead of "0 of 0", and this is also exactly what
+    the flatten endpoint returns for "show me every component, no drilling required.\""""
+    parts = list(assembly.parts)
+    for child in assembly.children:
+        parts.extend(collect_subtree_parts(child))
+    return parts
+
+
 def assembly_completion(assembly) -> dict:
     """%complete for the leaderboard — a count of fact (parts currently sitting at the
     assembly's declared terminal operation), never a plan comparison. Honestly "unknown"
     (`pct_complete: None`) rather than guessed when the assembly has no parts yet or no
-    terminal_operation has been declared for it."""
-    parts = assembly.parts
+    terminal_operation has been declared for it. Rolls up every part in the subtree, not just
+    this assembly's direct ones — see collect_subtree_parts."""
+    parts = collect_subtree_parts(assembly)
     total = len(parts)
     if total == 0:
         return {"total_parts": 0, "complete_parts": None, "pct_complete": None}
@@ -64,11 +98,12 @@ def assembly_completion(assembly) -> dict:
 
 
 def assembly_risk(assembly) -> dict:
-    """The two signals the leaderboard sorts worst-first by: the longest any one of this
-    assembly's parts has been sitting still, and how many open expedite requests it's carrying."""
+    """The two signals the leaderboard sorts worst-first by: the longest any one part anywhere
+    in this assembly's subtree has been sitting still, and how many open expedite requests it's
+    carrying — rolled up the same way as assembly_completion."""
     worst_dwell_sec = 0.0
     open_hot_flags = 0
-    for p in assembly.parts:
+    for p in collect_subtree_parts(assembly):
         st = current_status(p)
         if st:
             worst_dwell_sec = max(worst_dwell_sec, st["dwell_sec"])

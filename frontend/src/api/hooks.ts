@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
-import type { Assembly, HotFlag, HotFlagStatus, ImportBatch, ImportRow, OperationConstraint, Part } from './types'
+import type { Assembly, FlatPart, HotFlag, HotFlagStatus, ImportBatch, ImportRow, OperationConstraint, Part } from './types'
 
 export function useAssemblies(filters?: { project?: string; portfolio?: string }) {
   const params = new URLSearchParams()
@@ -19,6 +19,29 @@ export function useAssembly(assemblyId: string | undefined) {
     queryKey: ['assemblies', 'detail', assemblyId],
     queryFn: () => api.get<Assembly>(`/assemblies/${assemblyId}`),
     enabled: !!assemblyId,
+  })
+}
+
+/** Every part anywhere under this assembly, at any depth, flattened into one list. */
+export function useAssemblyFlatten(assemblyId: string | undefined) {
+  return useQuery({
+    queryKey: ['assemblies', 'detail', assemblyId, 'flatten'],
+    queryFn: () => api.get<FlatPart[]>(`/assemblies/${assemblyId}/flatten`),
+    enabled: !!assemblyId,
+  })
+}
+
+export function useCreateAssembly() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (data: { name: string; parent_assembly_id?: string; project?: string; portfolio?: string; due_date?: string }) =>
+      api.post<Assembly>('/assemblies', data),
+    onSuccess: (_result, variables) => {
+      qc.invalidateQueries({ queryKey: ['assemblies'] })
+      if (variables.parent_assembly_id) {
+        qc.invalidateQueries({ queryKey: ['assemblies', 'detail', variables.parent_assembly_id] })
+      }
+    },
   })
 }
 

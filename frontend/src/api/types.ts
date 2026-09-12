@@ -68,12 +68,28 @@ export interface Assembly {
   portfolio: string | null
   due_date: string | null
   terminal_operation: string | null
+  /** Null for a top-level assembly — the only kind the leaderboard lists. Set for a
+   * subassembly, which surfaces only by drilling into its parent. */
+  parent_assembly_id: string | null
   created_at: string
+  /** Direct parts/children only — see `completion`/`worst_dwell_sec` for the whole-subtree
+   * rollup, and GET /assemblies/:id/flatten for every part at any depth in one list. */
   part_count: number
+  child_count: number
   completion: AssemblyCompletion
   worst_dwell_sec: number
   open_hot_flags: number
+  /** Detail endpoint only. */
   parts?: Part[]
+  children?: Assembly[]
+  /** Root-to-self breadcrumb, not including this assembly itself. */
+  ancestors?: Assembly[]
+}
+
+/** One row of the flatten view — every part anywhere under an assembly, regardless of depth.
+ * `assembly_path` is the subassembly chain (this assembly first) the part actually lives in. */
+export interface FlatPart extends Part {
+  assembly_path: string[]
 }
 
 /** One row of the Constraints view: everywhere currently-tracked parts are sitting right now,

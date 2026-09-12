@@ -10,6 +10,10 @@ extract lists every part every time, moved or not) so dwell time has something t
 show; two open-vs-acknowledged hot flags so that flow has real data on first run; and the two
 assemblies land at different %complete (0/5 vs 1/3) and different due-date urgency so the
 leaderboard has something worth ranking.
+
+Bracket Assembly Unit 1 also carries two levels of subassembly (Fastener Kit, and Hardware Set
+nested under that) — a real BOM rarely stays one level flat, and the demo should show the tree
+actually going deeper than one layer, plus give the "flatten" view something real to roll up.
 """
 
 from datetime import date, timedelta
@@ -27,10 +31,10 @@ _TERMINAL_OP = "Pack & Stage to Stock"
 _ROWS = [
     ("BKT-1001", "bkt", "Mounting bracket, machined aluminum", "WO-44210",
      "Material Issue / Kitting", "Fabrication (Cut / Machine)", None),
-    ("BKT-1002", "bkt", "Mounting bracket, machined aluminum", "WO-44211",
+    ("BKT-1002", "fastener_kit", "Mounting bracket, machined aluminum", "WO-44211",
      "Fabrication (Cut / Machine)", "Fabrication (Cut / Machine)",
      "Awaiting 2nd-op tooling — fixture in use on another job"),
-    ("BKT-1003", "bkt", "Standoff, weldment", "WO-44212",
+    ("BKT-1003", "hardware_set", "Standoff, weldment", "WO-44212",
      "Joining (Weld / Braze / Bond)", "In-Process Inspection", None),
     ("BKT-1004", "bkt", "Bracket, painted assy", "WO-44213",
      "Finish (Paint / Coat / Plate)", "Finish (Paint / Coat / Plate)",
@@ -72,6 +76,21 @@ def seed_if_empty():
         ),
     }
     db.session.add_all(assemblies.values())
+    db.session.flush()  # need "bkt".id before it can be a parent
+
+    # Two levels of subassembly under Bracket Assembly Unit 1 — see module docstring.
+    assemblies["fastener_kit"] = Assembly(
+        name="Fastener Kit", project=_BKT, portfolio=_PORTFOLIO,
+        parent_assembly_id=assemblies["bkt"].id,
+    )
+    db.session.add(assemblies["fastener_kit"])
+    db.session.flush()  # need "fastener_kit".id before it can be a parent in turn
+
+    assemblies["hardware_set"] = Assembly(
+        name="Hardware Set", project=_BKT, portfolio=_PORTFOLIO,
+        parent_assembly_id=assemblies["fastener_kit"].id,
+    )
+    db.session.add(assemblies["hardware_set"])
     db.session.flush()
 
     batch_a = ImportBatch(imported_at=_now() - 6 * DAY, source_label="S4 extract", row_count=len(_ROWS))

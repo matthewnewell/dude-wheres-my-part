@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from status import current_status  # noqa: E402
+from status import assembly_path, collect_subtree_parts, current_status  # noqa: E402
 
 NOW = datetime.now(timezone.utc)
 
@@ -47,3 +47,36 @@ def test_notes_and_date_come_from_the_latest_snapshot_only():
     p = part([snap("Kitting", 6, notes="old note"), snap("Weld", 0, notes="fresh note")])
     st = current_status(p)
     assert st["s4_notes"] == "fresh note"
+
+
+# ── Subassembly tree helpers ───────────────────────────────────────────────────────────────
+
+def asm(name, parent=None, parts=None, children=None):
+    a = SimpleNamespace(name=name, parent=parent, parts=parts or [], children=children or [])
+    for child in a.children:
+        child.parent = a
+    return a
+
+
+def test_assembly_path_is_root_to_self():
+    root = asm("Top")
+    mid = asm("Mid", parent=root)
+    leaf = asm("Leaf", parent=mid)
+    assert [a.name for a in assembly_path(leaf)] == ["Top", "Mid", "Leaf"]
+
+
+def test_assembly_path_of_top_level_is_just_itself():
+    root = asm("Top")
+    assert [a.name for a in assembly_path(root)] == ["Top"]
+
+
+def test_collect_subtree_parts_rolls_up_every_depth():
+    grandchild = asm("Hardware Set", parts=["p3"])
+    child = asm("Fastener Kit", parts=["p2"], children=[grandchild])
+    root = asm("Bracket Assembly", parts=["p1"], children=[child])
+    assert collect_subtree_parts(root) == ["p1", "p2", "p3"]
+
+
+def test_collect_subtree_parts_of_leaf_is_just_its_own():
+    leaf = asm("Hardware Set", parts=["p1"])
+    assert collect_subtree_parts(leaf) == ["p1"]

@@ -38,6 +38,15 @@
   letter-spacing: -0.03em;
 }
 
+.splash-hero__tagline {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+
 .splash-hero__sub {
   margin: 0;
   max-width: 56ch;
