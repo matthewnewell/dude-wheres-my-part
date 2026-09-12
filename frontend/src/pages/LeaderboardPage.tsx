@@ -119,13 +119,6 @@ export default function LeaderboardPage() {
   return (
     <div className="leaderboard">
       <div className="leaderboard__inner">
-        <header className="leaderboard__header">
-          <div>
-            <h1 className="leaderboard__title">Assembly</h1>
-            <p className="leaderboard__hint">Every top-level assembly, worst-first. Click a column to sort, a row to drill into its parts.</p>
-          </div>
-        </header>
-
         <div className="leaderboard__filters">
           <div className="checkbox-filter">
             <span className="checkbox-filter__label">Portfolio</span>

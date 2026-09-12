@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { useAssembly, useAssemblyFlatten, useCreateAssembly } from '../api/hooks'
+import { useAssembly, useAssemblyFlatten } from '../api/hooks'
 import type { FlatPart } from '../api/types'
 import { dwellSeverity, formatDwell } from '../lib/dwell'
 import { daysUntil, formatDueDate, isOverdue } from '../lib/date'
@@ -20,10 +20,6 @@ export default function AssemblyDetailPage() {
   const hasChildren = !!assembly?.children?.length
   const flatQuery = useAssemblyFlatten(flatten ? assemblyId : undefined)
 
-  const [addingSub, setAddingSub] = useState(false)
-  const [subName, setSubName] = useState('')
-  const createAssembly = useCreateAssembly()
-
   const sortedParts = useMemo(() => {
     if (!assembly?.parts) return []
     return [...assembly.parts].sort((a, b) => (b.status?.dwell_sec ?? 0) - (a.status?.dwell_sec ?? 0))
@@ -36,14 +32,6 @@ export default function AssemblyDetailPage() {
   const pct = assembly.completion.pct_complete
   const overdue = isOverdue(assembly.due_date)
   const days = daysUntil(assembly.due_date)
-
-  function submitSub() {
-    if (!subName.trim() || !assemblyId) return
-    createAssembly.mutate(
-      { name: subName.trim(), parent_assembly_id: assemblyId },
-      { onSuccess: () => { setSubName(''); setAddingSub(false) } },
-    )
-  }
 
   return (
     <div className="assembly-detail">
@@ -107,26 +95,7 @@ export default function AssemblyDetailPage() {
         <section className="assembly-detail__section">
           <div className="assembly-detail__section-heading">
             <h2 className="assembly-detail__section-title">Subassemblies</h2>
-            {!addingSub && (
-              <button className="dwmp-btn dwmp-btn--ghost" onClick={() => setAddingSub(true)}>+ Add subassembly</button>
-            )}
           </div>
-
-          {addingSub && (
-            <div className="assembly-detail__sub-form">
-              <input
-                autoFocus
-                placeholder="Subassembly name"
-                value={subName}
-                onChange={(e) => setSubName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && submitSub()}
-              />
-              <button className="dwmp-btn dwmp-btn--primary" onClick={submitSub} disabled={!subName.trim() || createAssembly.isPending}>
-                {createAssembly.isPending ? 'Adding…' : 'Add'}
-              </button>
-              <button className="dwmp-btn dwmp-btn--ghost" onClick={() => { setAddingSub(false); setSubName('') }}>Cancel</button>
-            </div>
-          )}
 
           {hasChildren ? (
             <div className="assembly-detail__children">
@@ -159,7 +128,7 @@ export default function AssemblyDetailPage() {
                 )
               })}
             </div>
-          ) : !addingSub && (
+          ) : (
             <p className="assembly-detail__empty">No subassemblies — every part below is direct.</p>
           )}
         </section>

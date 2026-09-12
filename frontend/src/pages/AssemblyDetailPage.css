@@ -162,19 +162,6 @@
   color: var(--color-text-faint);
 }
 
-.assembly-detail__sub-form {
-  display: flex;
-  gap: 8px;
-}
-
-.assembly-detail__sub-form input {
-  flex: 1;
-  padding: 7px 10px;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-}
-
 .assembly-detail__children {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));

@@ -31,20 +31,6 @@ export function useAssemblyFlatten(assemblyId: string | undefined) {
   })
 }
 
-export function useCreateAssembly() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (data: { name: string; parent_assembly_id?: string; project?: string; portfolio?: string; due_date?: string }) =>
-      api.post<Assembly>('/assemblies', data),
-    onSuccess: (_result, variables) => {
-      qc.invalidateQueries({ queryKey: ['assemblies'] })
-      if (variables.parent_assembly_id) {
-        qc.invalidateQueries({ queryKey: ['assemblies', 'detail', variables.parent_assembly_id] })
-      }
-    },
-  })
-}
-
 export function usePortfolios() {
   return useQuery({
     queryKey: ['portfolios'],
