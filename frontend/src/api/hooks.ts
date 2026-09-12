@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
-import type { Assembly, HotFlag, HotFlagStatus, ImportBatch, ImportRow, Part } from './types'
+import type { Assembly, HotFlag, HotFlagStatus, ImportBatch, ImportRow, OperationConstraint, Part } from './types'
 
 export function useAssemblies(filters?: { project?: string; portfolio?: string }) {
   const params = new URLSearchParams()
@@ -49,6 +49,14 @@ export function useProjects() {
   return useQuery({
     queryKey: ['projects'],
     queryFn: () => api.get<string[]>('/projects'),
+  })
+}
+
+export function useConstraints(project?: string) {
+  return useQuery({
+    queryKey: ['constraints', project ?? null],
+    queryFn: () => api.get<OperationConstraint[]>(`/constraints${project ? `?project=${encodeURIComponent(project)}` : ''}`),
+    refetchInterval: 30_000,
   })
 }
 

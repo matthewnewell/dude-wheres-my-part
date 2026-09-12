@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 
 from db import db
 from models import HOT_FLAG_STATUSES, Assembly, HotFlag, ImportBatch, Part, StatusSnapshot, _now
-from status import assembly_completion, assembly_risk, current_status
+from status import assembly_completion, assembly_risk, current_status, operation_constraints
 
 bp = Blueprint("parts", __name__, url_prefix="/api")
 
@@ -73,6 +73,17 @@ def get_part(part_id):
     d = p.to_dict(include_snapshots=True)
     d["status"] = current_status(p)
     return jsonify(d)
+
+
+@bp.get("/constraints")
+def list_constraints():
+    """Where work is piling up right now: every currently-tracked part's operation, grouped and
+    counted, worst (most parts) first. `?project=` scopes it the same way /parts does."""
+    project = request.args.get("project")
+    q = Part.query
+    if project:
+        q = q.filter(Part.project == project)
+    return jsonify(operation_constraints(q.all()))
 
 
 @bp.get("/projects")

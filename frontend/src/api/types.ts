@@ -76,6 +76,16 @@ export interface Assembly {
   parts?: Part[]
 }
 
+/** One row of the Constraints view: everywhere currently-tracked parts are sitting right now,
+ * grouped by operation. A count and the oldest raw dwell time in that group — never a
+ * queue-vs-capacity or expected-time judgment, same rule as the rest of this app. */
+export interface OperationConstraint {
+  operation: string
+  part_count: number
+  oldest_dwell_sec: number
+  open_hot_flags: number
+}
+
 export interface ImportBatch {
   id: string
   imported_at: string

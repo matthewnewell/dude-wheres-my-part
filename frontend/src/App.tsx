@@ -4,6 +4,7 @@ import SplashPage from './pages/SplashPage'
 import LeaderboardPage from './pages/LeaderboardPage'
 import AssemblyDetailPage from './pages/AssemblyDetailPage'
 import PartsBoardPage from './pages/PartsBoardPage'
+import ConstraintsPage from './pages/ConstraintsPage'
 import PartDetailPage from './pages/PartDetailPage'
 import ImportPage from './pages/ImportPage'
 import './App.css'
@@ -27,6 +28,7 @@ export default function App() {
       <Route path="/" element={<Layout><LeaderboardPage /></Layout>} />
       <Route path="/assemblies/:assemblyId" element={<Layout><AssemblyDetailPage /></Layout>} />
       <Route path="/parts" element={<Layout><PartsBoardPage /></Layout>} />
+      <Route path="/constraints" element={<Layout><ConstraintsPage /></Layout>} />
       <Route path="/parts/:partId" element={<Layout><PartDetailPage /></Layout>} />
       <Route path="/import" element={<Layout><ImportPage /></Layout>} />
     </Routes>

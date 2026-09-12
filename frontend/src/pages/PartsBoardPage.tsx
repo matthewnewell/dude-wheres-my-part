@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useImportBatches, useParts, useProjects } from '../api/hooks'
 import { dwellSeverity, formatDwell, formatRelative } from '../lib/dwell'
 import './PartsBoardPage.css'
@@ -15,11 +15,25 @@ export default function PartsBoardPage() {
   const { data: batches } = useImportBatches()
   const latestBatch = batches?.[0]
 
+  // `?operation=` lets the Constraints page deep-link straight to "show me the parts sitting
+  // at this operation" — same plain-URL-reference pattern as the leaderboard's `?project=`.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const operation = searchParams.get('operation')
+
+  function clearOperation() {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.delete('operation')
+      return next
+    }, { replace: true })
+  }
+
   const sorted = useMemo(() => {
     if (!parts) return []
+    const filtered = operation ? parts.filter((p) => p.status?.operation === operation) : parts
     // Longest-stuck first — the point of this board is "what needs a look," not alphabetical.
-    return [...parts].sort((a, b) => (b.status?.dwell_sec ?? 0) - (a.status?.dwell_sec ?? 0))
-  }, [parts])
+    return [...filtered].sort((a, b) => (b.status?.dwell_sec ?? 0) - (a.status?.dwell_sec ?? 0))
+  }, [parts, operation])
 
   return (
     <div className="parts-board">
@@ -32,6 +46,12 @@ export default function PartsBoardPage() {
                 ? <>As of the {latestBatch.source_label ?? 'last'} pull, {formatRelative(latestBatch.imported_at)}.</>
                 : 'No extract imported yet.'}
             </p>
+            {operation && (
+              <p className="parts-board__asof">
+                Filtered to operation <strong>{operation}</strong> ·{' '}
+                <button className="parts-board__clear-filter" onClick={clearOperation}>clear</button>
+              </p>
+            )}
           </div>
           <select
             className="parts-board__project-filter"

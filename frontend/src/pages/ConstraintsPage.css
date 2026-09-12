@@ -1,0 +1,121 @@
+.constraints {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.constraints__inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.constraints__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.constraints__header select {
+  padding: 7px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: 13px;
+}
+
+.constraints__title {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.constraints__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-faint);
+  max-width: 46ch;
+}
+
+.constraints__empty {
+  color: var(--color-text-faint);
+  font-size: 13px;
+}
+
+.constraints-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.constraints-table thead th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-faint);
+  background: var(--color-surface-sunken);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.constraints-table__num {
+  text-align: right;
+}
+
+.constraints-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.constraints-table__row {
+  cursor: pointer;
+}
+
+.constraints-table__row:hover td {
+  background: var(--color-surface-sunken);
+}
+
+.constraints-table__row:last-child td {
+  border-bottom: 0;
+}
+
+.constraints-table__strong {
+  font-weight: 700;
+}
+
+.constraints-table__muted {
+  color: var(--color-text-faint);
+}
+
+.mini-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.mini-bar__track {
+  width: 60px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-surface-sunken);
+  overflow: hidden;
+}
+
+.mini-bar__fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 999px;
+}

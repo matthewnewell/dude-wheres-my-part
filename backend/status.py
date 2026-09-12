@@ -74,3 +74,27 @@ def assembly_risk(assembly) -> dict:
             worst_dwell_sec = max(worst_dwell_sec, st["dwell_sec"])
         open_hot_flags += sum(1 for f in p.hot_flags if f.status != "resolved")
     return {"worst_dwell_sec": worst_dwell_sec, "open_hot_flags": open_hot_flags}
+
+
+def operation_constraints(parts) -> list[dict]:
+    """"Where is work piling up right now" — every given part's current operation, grouped and
+    counted. This is the Theory-of-Constraints view: not a per-assembly or per-part read, but
+    "which operation is holding the most parts, and how long has the oldest one been sitting
+    there." Same rule as everywhere else in this app: a count and a raw wall-clock dwell time,
+    never a queue-vs-capacity judgment and never a comparison to an expected time. A part with
+    no snapshot yet (never seen on an extract) contributes nothing — it isn't "at" anywhere."""
+    groups: dict[str, dict] = {}
+    for p in parts:
+        st = current_status(p)
+        if not st:
+            continue
+        g = groups.setdefault(st["operation"], {
+            "operation": st["operation"],
+            "part_count": 0,
+            "oldest_dwell_sec": 0.0,
+            "open_hot_flags": 0,
+        })
+        g["part_count"] += 1
+        g["oldest_dwell_sec"] = max(g["oldest_dwell_sec"], st["dwell_sec"])
+        g["open_hot_flags"] += sum(1 for f in p.hot_flags if f.status != "resolved")
+    return sorted(groups.values(), key=lambda g: g["part_count"], reverse=True)

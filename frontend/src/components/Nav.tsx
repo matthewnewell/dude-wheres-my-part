@@ -21,7 +21,13 @@ export default function Nav() {
           to="/parts"
           className={({ isActive }) => `dwmp-nav__link ${isActive ? 'dwmp-nav__link--active' : ''}`}
         >
-          Parts
+          Work in Progress
+        </NavLink>
+        <NavLink
+          to="/constraints"
+          className={({ isActive }) => `dwmp-nav__link ${isActive ? 'dwmp-nav__link--active' : ''}`}
+        >
+          Constraints
         </NavLink>
         <NavLink
           to="/import"

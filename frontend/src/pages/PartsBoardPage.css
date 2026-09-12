@@ -33,6 +33,20 @@
   color: var(--color-text-faint);
 }
 
+.parts-board__asof + .parts-board__asof {
+  margin-top: 4px;
+}
+
+.parts-board__clear-filter {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  color: var(--color-accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .parts-board__project-filter {
   padding: 7px 10px;
   border: 1px solid var(--color-border-strong);
