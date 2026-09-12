@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from status import assembly_path, collect_subtree_parts, current_status  # noqa: E402
+from status import assembly_chain_names, assembly_path, collect_subtree_parts, current_status  # noqa: E402
 
 NOW = datetime.now(timezone.utc)
 
@@ -80,3 +80,16 @@ def test_collect_subtree_parts_rolls_up_every_depth():
 def test_collect_subtree_parts_of_leaf_is_just_its_own():
     leaf = asm("Hardware Set", parts=["p1"])
     assert collect_subtree_parts(leaf) == ["p1"]
+
+
+def test_assembly_chain_names_is_root_to_direct_assembly():
+    root = asm("Bracket Assembly")
+    mid = asm("Fastener Kit", parent=root)
+    leaf = asm("Hardware Set", parent=mid)
+    p = SimpleNamespace(assembly=leaf)
+    assert assembly_chain_names(p) == ["Bracket Assembly", "Fastener Kit", "Hardware Set"]
+
+
+def test_assembly_chain_names_empty_when_unassigned():
+    p = SimpleNamespace(assembly=None)
+    assert assembly_chain_names(p) == []

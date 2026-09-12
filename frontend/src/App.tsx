@@ -28,7 +28,7 @@ export default function App() {
       <Route path="/" element={<Layout><LeaderboardPage /></Layout>} />
       <Route path="/assemblies/:assemblyId" element={<Layout><AssemblyDetailPage /></Layout>} />
       <Route path="/parts" element={<Layout><PartsBoardPage /></Layout>} />
-      <Route path="/constraints" element={<Layout><ConstraintsPage /></Layout>} />
+      <Route path="/backlog" element={<Layout><ConstraintsPage /></Layout>} />
       <Route path="/parts/:partId" element={<Layout><PartDetailPage /></Layout>} />
       <Route path="/import" element={<Layout><ImportPage /></Layout>} />
     </Routes>

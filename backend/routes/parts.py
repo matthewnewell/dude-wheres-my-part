@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 from db import db
 from models import HOT_FLAG_STATUSES, Assembly, HotFlag, ImportBatch, Part, StatusSnapshot, _now
 from status import (
+    assembly_chain_names,
     assembly_completion,
     assembly_path,
     assembly_risk,
@@ -119,8 +120,9 @@ def list_portfolios():
 
 @bp.get("/parts")
 def list_parts():
-    """Every part, with its computed current status and open-hot-flag count. `?project=` filters
-    to one project's parts — a PM's own view instead of the whole shop's."""
+    """Every part, with its computed current status, open-hot-flag count, and full assembly
+    chain (root-to-direct-assembly names — see assembly_chain_names). `?project=` filters to
+    one project's parts — a PM's own view instead of the whole shop's."""
     project = request.args.get("project")
     q = Part.query
     if project:
@@ -132,6 +134,7 @@ def list_parts():
         d = p.to_dict()
         d["status"] = current_status(p)
         d["open_hot_flags"] = sum(1 for h in p.hot_flags if h.status != "resolved")
+        d["assembly_chain"] = assembly_chain_names(p)
         out.append(d)
     return jsonify(out)
 
@@ -141,6 +144,7 @@ def get_part(part_id):
     p = Part.query.get_or_404(part_id)
     d = p.to_dict(include_snapshots=True)
     d["status"] = current_status(p)
+    d["assembly_chain"] = assembly_chain_names(p)
     return jsonify(d)
 
 

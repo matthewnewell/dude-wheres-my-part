@@ -28,15 +28,12 @@ export default function SplashPage() {
         <div className="splash-page__content">
           <header className="splash-hero">
             <h1 className="splash-hero__title">Manufacturing Work in Progress</h1>
-            <p className="splash-hero__tagline">
-              Real-time visibility, no report required.
-            </p>
             <p className="splash-hero__sub">
-              Track parts across every stage of production and identify workflow bottlenecks.
+              Track assemblies and identify workflow bottlenecks.
             </p>
             <div className="splash-hero__actions">
               <Link className="splash-btn splash-btn--primary" to="/">View Assembly</Link>
-              <Link className="splash-btn splash-btn--ghost" to="/constraints">Constraints</Link>
+              <Link className="splash-btn splash-btn--ghost" to="/backlog">Backlog</Link>
             </div>
           </header>
 

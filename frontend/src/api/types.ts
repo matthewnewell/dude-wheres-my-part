@@ -48,6 +48,10 @@ export interface Part {
   created_at: string
   status: PartStatus | null
   open_hot_flags?: number
+  /** Root-to-direct-assembly chain of names — "Bracket Assembly Unit 1", "Fastener Kit",
+   * "Hardware Set" — not just assembly_name's leaf. [] (or absent) if unassigned. Present on
+   * /parts and /parts/:id; not sent everywhere a Part appears. */
+  assembly_chain?: string[]
   snapshots?: StatusSnapshot[]
   hot_flags?: HotFlag[]
 }

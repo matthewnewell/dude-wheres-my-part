@@ -51,6 +51,16 @@ def assembly_path(assembly) -> list:
     return list(reversed(chain))
 
 
+def assembly_chain_names(part) -> list[str]:
+    """Root-to-direct-assembly chain of names for a part — "Bracket Assembly Unit 1 > Fastener
+    Kit > Hardware Set", not just the leaf it's directly under. [] if the part isn't assigned
+    to an assembly yet. Used anywhere a part needs to show its full context at a glance (e.g.
+    the Backlog page's part popup) without a separate lookup."""
+    if not part.assembly:
+        return []
+    return [a.name for a in assembly_path(part.assembly)]
+
+
 def collect_descendant_assemblies(assembly) -> list:
     """Every assembly nested under this one, at any depth — not including itself."""
     out = []

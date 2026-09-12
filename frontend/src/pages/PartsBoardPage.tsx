@@ -15,7 +15,7 @@ export default function PartsBoardPage() {
   const { data: batches } = useImportBatches()
   const latestBatch = batches?.[0]
 
-  // `?operation=` lets the Constraints page deep-link straight to "show me the parts sitting
+  // `?operation=` lets the Backlog page deep-link straight to "show me the parts sitting
   // at this operation" — same plain-URL-reference pattern as the leaderboard's `?project=`.
   const [searchParams, setSearchParams] = useSearchParams()
   const operation = searchParams.get('operation')
