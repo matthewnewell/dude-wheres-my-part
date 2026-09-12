@@ -39,12 +39,6 @@ export default function ConstraintsPage() {
     <div className="constraints">
       <div className="constraints__inner">
         <header className="constraints__header">
-          <div>
-            <h1 className="constraints__title">Backlog</h1>
-            <p className="constraints__hint">
-              Every operation currently holding parts, most-parts first. Expand a row to see what's actually stuck there.
-            </p>
-          </div>
           <select value={project} onChange={(e) => setProject(e.target.value)}>
             <option value="">All projects</option>
             {(projects ?? []).map((p) => <option key={p} value={p}>{p}</option>)}
