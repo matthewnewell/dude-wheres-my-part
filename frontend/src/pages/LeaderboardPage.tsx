@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAssemblies, usePortfolios, useProjects } from '../api/hooks'
 import { dwellSeverity, formatDwell } from '../lib/dwell'
 import { daysUntil, formatDueDate, isOverdue } from '../lib/date'
@@ -43,20 +43,40 @@ export default function LeaderboardPage() {
   const { data: assemblies, isLoading } = useAssemblies()
   const followed = useFollowedIds()
 
+  // `?project=` (and `?portfolio=`) let another app deep-link straight to "just my work" —
+  // the same plain-URL-reference pattern Conway's Depot already uses to link into a specific
+  // Value Stream map. A project subscribing to this app in Conway's Depot and landing here
+  // pre-filtered to its own assemblies is what that link would point at.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialPortfolio = searchParams.get('portfolio')
+
   const [hiddenPortfolios, setHiddenPortfolios] = useState<Set<string>>(new Set())
-  const [project, setProject] = useState('')
+  const [project, setProjectState] = useState(() => searchParams.get('project') ?? '')
   const [followingOnly, setFollowingOnly] = useState(false)
   const [sortKey, setSortKey] = useState<SortKey | null>(null)
   const [sortDesc, setSortDesc] = useState(true)
 
-  // Newly-seen portfolios default to visible (checkbox filters start all-checked).
+  function setProject(value: string) {
+    setProjectState(value)
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (value) next.set('project', value)
+      else next.delete('project')
+      return next
+    }, { replace: true })
+  }
+
+  // Newly-seen portfolios default to visible (checkbox filters start all-checked) — unless the
+  // URL named one specific portfolio to start with, in which case every other one starts hidden.
   useEffect(() => {
     if (!allPortfolios) return
     setHiddenPortfolios((prev) => {
+      if (initialPortfolio) return new Set(allPortfolios.filter((p) => p !== initialPortfolio))
       const next = new Set(prev)
       for (const p of prev) if (!allPortfolios.includes(p)) next.delete(p)
       return next
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allPortfolios])
 
   function togglePortfolio(p: string) {
