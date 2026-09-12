@@ -151,3 +151,18 @@ a {
   font-weight: 700;
   color: var(--color-accent);
 }
+
+/* ── "follow" star toggle — shared between the leaderboard rows and the assembly header ── */
+.star-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 16px;
+  color: var(--color-border-strong);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.star-btn--active {
+  color: var(--color-accent);
+}

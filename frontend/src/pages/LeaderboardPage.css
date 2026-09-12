@@ -4,12 +4,12 @@
 }
 
 .leaderboard__inner {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 28px 20px 80px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .leaderboard__header {
@@ -35,10 +35,19 @@
 
 .leaderboard__filters {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
-.leaderboard__filters select {
+.leaderboard__filters-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.leaderboard__filters-right select {
   padding: 7px 10px;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
@@ -46,102 +55,157 @@
   font-size: 13px;
 }
 
+.leaderboard__following-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
 .leaderboard__empty {
   color: var(--color-text-faint);
   font-size: 13px;
 }
 
-.assembly-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 14px;
-}
-
-.assembly-card {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px 18px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  text-align: left;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.assembly-card:hover {
-  border-color: var(--color-accent);
-  box-shadow: var(--shadow-sm);
-}
-
-.assembly-card__top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.assembly-card__name {
-  font-weight: 700;
-  font-size: 1rem;
-}
-
-.assembly-card__meta {
-  font-size: 12px;
-  color: var(--color-text-faint);
-  margin-top: 2px;
-}
-
-.assembly-card__progress-row {
+/* ── checkbox filter row — same shape as Conway's Depot's Category filter ── */
+.checkbox-filter {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 }
 
-.assembly-card__progress-track {
-  flex: 1;
-  height: 8px;
+.checkbox-filter__label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-faint);
+}
+
+.checkbox-filter__option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.checkbox-filter__option input {
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+/* ── leaderboard table ── */
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.leaderboard-table thead th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-faint);
+  background: var(--color-surface-sunken);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.leaderboard-table__sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.leaderboard-table__sortable:hover {
+  color: var(--color-text);
+}
+
+.leaderboard-table__num {
+  text-align: right;
+}
+
+.leaderboard-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.leaderboard-table__row {
+  cursor: pointer;
+}
+
+.leaderboard-table__row:hover td {
+  background: var(--color-surface-sunken);
+}
+
+.leaderboard-table__row:last-child td {
+  border-bottom: 0;
+}
+
+.leaderboard-table__strong {
+  font-weight: 700;
+}
+
+.leaderboard-table__meta {
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.leaderboard-table__portfolio {
+  color: var(--color-text-faint);
+}
+
+.leaderboard-table__muted {
+  color: var(--color-text-faint);
+}
+
+.leaderboard-table__star {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.mini-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.mini-progress__track {
+  width: 60px;
+  height: 6px;
   border-radius: 999px;
   background: var(--color-surface-sunken);
   overflow: hidden;
 }
 
-.assembly-card__progress-fill {
+.mini-progress__fill {
   height: 100%;
   background: var(--color-accent);
   border-radius: 999px;
-  transition: width 0.2s ease;
 }
 
-.assembly-card__pct {
-  font-size: 13px;
+.late-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
   font-weight: 700;
-  white-space: nowrap;
-}
-
-.assembly-card__pct-sub {
-  font-weight: 400;
-  color: var(--color-text-faint);
-}
-
-.assembly-card__bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.due-pill {
   font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
-.due-pill--overdue {
+  background: var(--color-critical-soft);
   color: var(--color-critical);
-  font-weight: 700;
 }

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAssembly } from '../api/hooks'
 import { dwellSeverity, formatDwell } from '../lib/dwell'
 import { daysUntil, formatDueDate, isOverdue } from '../lib/date'
+import { toggleFollow, useFollowedIds } from '../lib/follow'
 import './PartsBoardPage.css'
 import './AssemblyDetailPage.css'
 
@@ -10,6 +11,7 @@ export default function AssemblyDetailPage() {
   const { assemblyId } = useParams<{ assemblyId: string }>()
   const navigate = useNavigate()
   const { data: assembly, isLoading } = useAssembly(assemblyId)
+  const followed = useFollowedIds()
 
   const sortedParts = useMemo(() => {
     if (!assembly?.parts) return []
@@ -29,10 +31,22 @@ export default function AssemblyDetailPage() {
 
         <header className="assembly-detail__header">
           <div>
-            <h1 className="assembly-detail__title">{assembly.name}</h1>
-            <p className="assembly-detail__meta">
-              {assembly.project} {assembly.portfolio && <>· {assembly.portfolio}</>}
-            </p>
+            <div className="assembly-detail__title-row">
+              <h1 className="assembly-detail__title">{assembly.name}</h1>
+              <button
+                className={`star-btn star-btn--lg${followed.has(assembly.id) ? ' star-btn--active' : ''}`}
+                onClick={() => toggleFollow(assembly.id)}
+                title={followed.has(assembly.id) ? 'Unfollow' : 'Follow'}
+              >
+                {followed.has(assembly.id) ? '★ Following' : '☆ Follow'}
+              </button>
+            </div>
+            <div className="assembly-detail__badges">
+              {assembly.project && <span className="assembly-detail__badge">{assembly.project}</span>}
+              {assembly.portfolio && (
+                <span className="assembly-detail__badge assembly-detail__badge--portfolio">{assembly.portfolio}</span>
+              )}
+            </div>
           </div>
           <div className="assembly-detail__stats">
             <div>
