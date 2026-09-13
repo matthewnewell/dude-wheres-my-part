@@ -62,12 +62,6 @@ export default function AssemblyDetailPage() {
               ))}
               <span> / {assembly.name}</span>
             </nav>
-            <div className="assembly-detail__badges">
-              {assembly.project && <span className="assembly-detail__badge">{assembly.project}</span>}
-              {assembly.portfolio && (
-                <span className="assembly-detail__badge assembly-detail__badge--portfolio">{assembly.portfolio}</span>
-              )}
-            </div>
           </div>
           <div className="assembly-detail__stats">
             <div>
